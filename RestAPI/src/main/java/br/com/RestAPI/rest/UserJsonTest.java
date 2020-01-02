@@ -6,8 +6,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
 
 import io.restassured.http.Method;
@@ -85,6 +83,7 @@ public class UserJsonTest {
 		;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deveVerificarListaRaiz() {
 		given()

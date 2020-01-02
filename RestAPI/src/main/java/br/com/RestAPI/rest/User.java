@@ -1,11 +1,23 @@
 package br.com.RestAPI.rest;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="user")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class User {
 	
-	private  long id;
+	@XmlAttribute
+	private  long id; 
 	private String name;
 	private Integer age;
 	private Double salary;
+	
+	public User () {
+		
+	}
 	
 	public User(String name, Integer age) {
 		super();
