@@ -3,7 +3,14 @@ package br.com.RestAPI.rest;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
+
+import io.restassured.http.ContentType;
+import io.restassured.path.xml.XmlPath;
+import io.restassured.path.xml.XmlPath.CompatibilityMode;
 
 public class AuthTest {
 	
@@ -95,5 +102,71 @@ public class AuthTest {
 		.statusCode(200)
 		.body("status",is("logado"))
 		;
+	}
+	
+	@Test
+	public void deveFazerAutenticacaoComToken() {
+		Map<String, String> login = new HashMap<String, String>();
+		login.put("email", "tuannynazareth@hotmail.com");
+		login.put("senha", "123456");
+		
+		//login API
+		//Receber o token
+		String token = given()
+			.log().all()
+			.body(login)
+			.contentType(ContentType.JSON)
+		.when()
+			.post("http://barrigarest.wcaquino.me/signin")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.extract().path("token")
+		;
+		//Obter as contas
+		given()
+			.log().all()
+			.header("Authorization", "JWT "+ token)
+		.when()
+			.get("http://barrigarest.wcaquino.me/contas")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.body("nome", hasItem("Conta Teste 1"))
+		;
+	}
+
+	@Test
+	public void deveAcessarAplicacaoWeb(){
+		//login
+		String cookie = given()
+			.log().all()
+			.formParam("email", "tuannynazareth@hotmail.com")
+			.formParam("senha", "123456")
+			.contentType(ContentType.URLENC.withCharset("UTF-8"))
+		.when()
+			.post("https://seubarriga.wcaquino.me/logar")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.extract().header("set-cookie")
+		;
+		cookie = cookie.split("=")[1].split(";")[0];
+		System.out.println(cookie);
+		//obter conta
+		String body = given()
+			.log().all()
+			.cookie("connect.sid", cookie)
+		.when()
+			.get("https://seubarriga.wcaquino.me/contas")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.body("html.body.table.tbody.tr[0].td[0]", is("Conta Teste 1"))
+			.extract().body().asString()
+		;
+		System.out.println("------------------------------------------");
+		XmlPath xmlPath = new XmlPath(CompatibilityMode.HTML, body);
+		System.out.println(xmlPath.getString("html.body.table.tbody.tr[0].td[0]"));
 	}
 }
